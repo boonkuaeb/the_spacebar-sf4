@@ -7,6 +7,7 @@ namespace App\Controller;
 use Michelf\MarkdownInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Psr\Log\LoggerInterface;
@@ -36,7 +37,7 @@ class ArticleController extends AbstractController
      * @throws \Twig_Error_Runtime
      * @throws \Twig_Error_Syntax
      */
-    public function show($slug, MarkdownInterface $markdown)
+    public function show($slug, MarkdownInterface $markdown , AdapterInterface $cache)
     {
 
         $comments = [
@@ -46,6 +47,9 @@ class ArticleController extends AbstractController
         ];
 
         $articleContent = <<<EOF
+        
+        **turkey** shank eu pork belly meatball non cupim.
+
 Spicy **jalapeno bacon** ipsum dolor amet veniam shank in dolore. Ham hock nisi landjaeger cow,
 lorem proident [beef ribs](https://baconipsum.com/) aute enim veniam ut cillum pork chuck picanha. Dolore reprehenderit
 labore minim pork belly spare ribs cupim short loin in. Elit exercitation eiusmod dolore cow
@@ -64,13 +68,19 @@ EOF;
 
         $articleContent = $markdown->transform($articleContent);
 
-        $html = $this->render('article/show.html.twig', [
+        $item = $cache->getItem('markdown_'.md5($articleContent));
+        if (!$item->isHit()) {
+            $item->set($markdown->transform($articleContent));
+            $cache->save($item);
+        }
+        $articleContent = $item->get();
+
+        return $this->render('article/show.html.twig', [
             'articleContent' => $articleContent,
             'title' => ucwords(str_replace('-', ' ', $slug)),
             'slug' => $slug,
             'comments' => $comments,
         ]);
-        return new Response($html);
     }
 
 

@@ -8,6 +8,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Psr\Log\LoggerInterface;
+use Twig\Environment;
+
 
 class ArticleController extends AbstractController
 {
@@ -25,9 +28,14 @@ class ArticleController extends AbstractController
     /**
      * @Route("/news/{slug}", name="article_show")
      *
+     * @param $slug
+     * @param Environment $twigEnvironment
      * @return Response
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Runtime
+     * @throws \Twig_Error_Syntax
      */
-    public function show($slug)
+    public function show($slug, Environment $twigEnvironment)
     {
 
         $comments = [
@@ -37,11 +45,12 @@ class ArticleController extends AbstractController
         ];
 
 
-        return $this->render('article/show.html.twig', [
+        $html = $twigEnvironment->render('article/show.html.twig', [
             'title' => ucwords(str_replace('-', ' ', $slug)),
             'slug' => $slug,
-            'comments' => $comments
+            'comments' => $comments,
         ]);
+        return new Response($html);
     }
 
 
@@ -51,9 +60,10 @@ class ArticleController extends AbstractController
      * @param $slug
      * @return JsonResponse
      */
-    public function toggleArticleHeart($slug)
+    public function toggleArticleHeart($slug, LoggerInterface $logger)
     {
         // TODO - actually heart/unheart the article!
+        $logger->info('Article is being hearted!');
         return new JsonResponse(['hearts' => rand(5, 100)]);
     }
 

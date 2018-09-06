@@ -31,14 +31,14 @@ class ArticleController extends AbstractController
      * @Route("/news/{slug}", name="article_show")
      *
      * @param $slug
-     * @param Environment $twigEnvironment
+     * @param MarkdownInterface $markdown
+     * @param AdapterInterface $cache
      * @return Response
-     * @throws \Twig_Error_Loader
-     * @throws \Twig_Error_Runtime
-     * @throws \Twig_Error_Syntax
      */
     public function show($slug, MarkdownInterface $markdown , AdapterInterface $cache)
     {
+        dump($markdown);die;
+
 
         $comments = [
             'I ate a normal rock once. It did NOT taste like bacon!',

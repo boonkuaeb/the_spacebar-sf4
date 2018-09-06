@@ -37,7 +37,6 @@ class ArticleController extends AbstractController
      */
     public function show($slug, MarkdownInterface $markdown , AdapterInterface $cache)
     {
-        dump($cache);die;
 
 
         $comments = [

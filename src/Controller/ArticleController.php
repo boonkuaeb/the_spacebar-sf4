@@ -11,11 +11,14 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Psr\Log\LoggerInterface;
-use Twig\Environment;
+use App\Service\MarkdownHelper;
 
 
 class ArticleController extends AbstractController
 {
+
+
+
     /**
      * @Route("/", name="app_homepage")
      *
@@ -31,11 +34,10 @@ class ArticleController extends AbstractController
      * @Route("/news/{slug}", name="article_show")
      *
      * @param $slug
-     * @param MarkdownInterface $markdown
-     * @param AdapterInterface $cache
+     * @param MarkdownHelper $markdownHelper
      * @return Response
      */
-    public function show($slug, MarkdownInterface $markdown , AdapterInterface $cache)
+    public function show($slug, MarkdownHelper $markdownHelper)
     {
 
 
@@ -64,15 +66,8 @@ strip steak pork belly aliquip capicola officia. Labore deserunt esse chicken lo
 cow est ribeye adipisicing. Pig hamburger pork belly enim. Do porchetta minim capicola irure pancetta chuck
 fugiat.
 EOF;
+        $articleContent = $markdownHelper->parse($articleContent);
 
-        $articleContent = $markdown->transform($articleContent);
-
-        $item = $cache->getItem('markdown_'.md5($articleContent));
-        if (!$item->isHit()) {
-            $item->set($markdown->transform($articleContent));
-            $cache->save($item);
-        }
-        $articleContent = $item->get();
 
         return $this->render('article/show.html.twig', [
             'articleContent' => $articleContent,

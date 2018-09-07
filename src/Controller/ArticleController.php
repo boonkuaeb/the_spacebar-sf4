@@ -5,6 +5,7 @@ namespace App\Controller;
 
 
 use App\Service\MarkdownHelper;
+use Nexy\Slack\Client;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,6 +16,14 @@ use Symfony\Component\HttpFoundation\Response;
 class ArticleController extends AbstractController
 {
 
+    private $isDebug;
+    private $slack;
+
+    public function __construct(bool $isDebug, Client $slack)
+    {
+        $this->isDebug = $isDebug;
+        $this->slack = $slack;
+    }
 
 
     /**
@@ -33,13 +42,23 @@ class ArticleController extends AbstractController
      *
      * @param $slug
      * @param MarkdownHelper $markdownHelper
+     * @param Client $slack
      * @return Response
+     * @throws \Http\Client\Exception
      */
     public function show($slug, MarkdownHelper $markdownHelper)
     {
 
+        if ($slug === 'khaaaaaan') {
+            $message = $this->slack->createMessage()
+                ->from('Khan')
+                ->withIcon(':ghost:')
+                ->setText('Ah, Kirk, my old friend...');
+            $this->slack->sendMessage($message);
 
-        $comments = [
+        }
+
+            $comments = [
             'I ate a normal rock once. It did NOT taste like bacon!',
             'Woohoo! I\'m going on an all-asteroid diet!',
             'I like bacon too! Buy some from my site! bakinsomebacon.com',
